@@ -1,7 +1,7 @@
 package org.sopt.controller;
 
 import org.sopt.dto.request.CreatePostRequest;
-import org.sopt.dto.reponse.CreatePostResponse;
+import org.sopt.dto.response.CreatePostResponse;
 import org.sopt.service.PostService;
 
 import java.util.List;
