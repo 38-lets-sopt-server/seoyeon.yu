@@ -9,9 +9,8 @@ public class PostRepository {
     private final List<Post> postList = new ArrayList<>();
     private Long nextId = 1L;
 
-    public Post save(Post post) {
+    public void save(Post post) {
         postList.add(post);
-        return post;
     }
 
     public List<Post> findAll() {
