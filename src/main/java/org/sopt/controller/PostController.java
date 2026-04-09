@@ -1,6 +1,7 @@
 package org.sopt.controller;
 
 import org.sopt.dto.request.CreatePostRequest;
+import org.sopt.dto.response.ApiResponse;
 import org.sopt.dto.response.CreatePostResponse;
 import org.sopt.dto.response.PostResponse;
 import org.sopt.exception.PostNotFoundException;
@@ -12,48 +13,48 @@ public class PostController {
     private final PostService postService = new PostService();
 
     // POST /posts
-    public CreatePostResponse createPost(CreatePostRequest request) {
+    public ApiResponse<CreatePostResponse> createPost(CreatePostRequest request) {
         try {
-            return postService.createPost(request);
+            CreatePostResponse response = postService.createPost(request);
+            return ApiResponse.success("게시글 등록 완료!", response);
         } catch (IllegalArgumentException e) {
-            return new CreatePostResponse(null, "🚫 " + e.getMessage());
+            return ApiResponse.fail(e.getMessage());
         }
     }
 
-    // GET /posts 📝 과제
-    public List<PostResponse> getAllPosts() {
-        return postService.getAllPosts();
+    // GET /posts
+    public ApiResponse<List<PostResponse>> getAllPosts() {
+        List<PostResponse> posts = postService.getAllPosts();
+        return ApiResponse.success("전체 게시글 조회 성공", posts);
     }
 
-    // GET /posts/{id} 📝 과제
-    public PostResponse getPost(Long id) {
+    // GET /posts/{id}
+    public ApiResponse<PostResponse> getPost(Long id) {
         try {
-            return postService.getPost(id);
+            PostResponse post = postService.getPost(id);
+            return ApiResponse.success("게시글 조회 성공", post);
         } catch (PostNotFoundException e) {
-            System.out.println("🚫 " + e.getMessage());
-            return null;
+            return ApiResponse.fail(e.getMessage());
         }
     }
 
-    // PUT /posts/{id} 📝 과제
-    public void updatePost(Long id, String newTitle, String newContent) {
+    // PUT /posts/{id}
+    public ApiResponse<Void> updatePost(Long id, String newTitle, String newContent) {
         try {
             postService.updatePost(id, newTitle, newContent);
-            System.out.println("✅ 게시글 수정 완료!");
-        } catch (IllegalArgumentException e) {
-            System.out.println("🚫 입력값 오류: " + e.getMessage());
-        } catch (PostNotFoundException e) {
-            System.out.println("🚫 조회 실패: " + e.getMessage());
+            return ApiResponse.success("게시글 수정 완료!");
+        } catch (IllegalArgumentException | PostNotFoundException e) {
+            return ApiResponse.fail(e.getMessage());
         }
     }
 
-    // DELETE /posts/{id} 📝 과제
-    public void deletePost(Long id) {
+    // DELETE /posts/{id}
+    public ApiResponse<Void> deletePost(Long id) {
         try {
             postService.deletePost(id);
-            System.out.println("✅ 게시글 삭제 완료!");
+            return ApiResponse.success("게시글 삭제 완료!");
         } catch (PostNotFoundException e) {
-            System.out.println("🚫 " + e.getMessage());
+            return ApiResponse.fail(e.getMessage());
         }
     }
 }

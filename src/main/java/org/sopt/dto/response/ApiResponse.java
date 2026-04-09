@@ -1,0 +1,28 @@
+package org.sopt.dto.response;
+
+public class ApiResponse<T> {
+    public final boolean success;
+    public final String message;
+    public final T data;
+
+    private ApiResponse(boolean success, String message, T data) {
+        this.success = success;
+        this.message = message;
+        this.data = data;
+    }
+
+    // 성공 - 데이터 있음
+    public static <T> ApiResponse<T> success(String message, T data) {
+        return new ApiResponse<>(true, message, data);
+    }
+
+    // 성공 - 데이터 없음
+    public static <T> ApiResponse<T> success(String message) {
+        return new ApiResponse<>(true, message, null);
+    }
+
+    // 실패
+    public static <T> ApiResponse<T> fail(String message) {
+        return new ApiResponse<>(false, message, null);
+    }
+}

@@ -22,7 +22,7 @@ public class PostService {
         String createdAt = java.time.LocalDateTime.now().toString();
         Post post = new Post(postRepository.generateId(), request.title, request.content, request.author, createdAt);
         postRepository.save(post);
-        return new CreatePostResponse(post.getId(), "게시글 등록 완료!");
+        return new CreatePostResponse(post.getId());
     }
 
     // READ - 전체 📝 과제
@@ -44,13 +44,13 @@ public class PostService {
 
     // UPDATE 📝 과제
     public void updatePost(Long id, String newTitle, String newContent) {
+        postValidator.validateTitle(newTitle);
+        postValidator.validateContent(newContent);
+
         Post post = postRepository.findById(id);
         if (post == null) {
             throw new PostNotFoundException(id);
         }
-
-        postValidator.validateTitle(newTitle);
-        postValidator.validateContent(newContent);
 
         post.update(newTitle, newContent);
     }
