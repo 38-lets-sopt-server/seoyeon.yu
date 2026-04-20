@@ -1,5 +1,6 @@
-# 🔥*Pull requests*
+# 🔥*Pull Requests*
 
+- Closes #
 
 ## 👷 **과제 구현**
 
