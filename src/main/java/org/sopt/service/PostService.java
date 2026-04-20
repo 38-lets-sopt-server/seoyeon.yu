@@ -3,61 +3,35 @@ package org.sopt.service;
 import org.sopt.domain.Post;
 import org.sopt.dto.request.CreatePostRequest;
 import org.sopt.dto.response.CreatePostResponse;
-import org.sopt.dto.response.PostResponse;
-import org.sopt.exception.PostNotFoundException;
 import org.sopt.repository.PostRepository;
 import org.sopt.validator.PostValidator;
+import org.springframework.stereotype.Service;
 
-import java.util.List;
-
+@Service
 public class PostService {
-    private final PostRepository postRepository = new PostRepository();
-    private final PostValidator postValidator = new PostValidator();
+
+    private final PostRepository postRepository;
+    private final PostValidator postValidator;
+
+    public PostService(PostRepository postRepository, PostValidator postValidator) {
+        this.postRepository = postRepository;
+        this.postValidator = postValidator;
+    }
 
     // CREATE
     public CreatePostResponse createPost(CreatePostRequest request) {
-        postValidator.validateTitle(request.title);
+        postValidator.validateTitle(request.title());
 
         String createdAt = java.time.LocalDateTime.now().toString();
-        Post post = new Post(postRepository.generateId(), request.title, request.content, request.author, createdAt);
+        Post post = new Post(
+                postRepository.generateId(),
+                request.title(),
+                request.content(),
+                request.author(),
+                createdAt
+        );
+
         postRepository.save(post);
         return new CreatePostResponse(post.getId());
-    }
-
-    // READ - 전체 📝 과제
-    public List<PostResponse> getAllPosts() {
-        return postRepository.findAll()
-                .stream()
-                .map(post -> new PostResponse(post.getId(), post.getTitle(), post.getContent(), post.getAuthor(), post.getCreatedAt()))
-                .toList();
-    }
-
-    // READ - 단건 📝 과제
-    public PostResponse getPost(Long id) {
-        Post post = postRepository.findById(id);
-        if (post == null) {
-            throw new PostNotFoundException(id);
-        }
-        return new PostResponse(post.getId(), post.getTitle(), post.getContent(), post.getAuthor(), post.getCreatedAt());
-    }
-
-    // UPDATE 📝 과제
-    public void updatePost(Long id, String newTitle, String newContent) {
-        postValidator.validateTitle(newTitle);
-
-        Post post = postRepository.findById(id);
-        if (post == null) {
-            throw new PostNotFoundException(id);
-        }
-
-        post.update(newTitle, newContent);
-    }
-
-    // DELETE 📝 과제
-    public void deletePost(Long id) {
-        boolean deleted = postRepository.deleteById(id);
-        if (!deleted) {
-            throw new PostNotFoundException(id);
-        }
     }
 }
