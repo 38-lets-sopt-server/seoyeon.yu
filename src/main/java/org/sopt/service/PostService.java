@@ -41,9 +41,12 @@ public class PostService {
     }
 
     // READ ALL
-    public List<PostResponse> getAllPosts() {
-        return postRepository.findAll()
-                .stream()
+    public List<PostResponse> getAllPosts(int page, int size) {
+        List<Post> allPosts = postRepository.findAll();
+
+        return allPosts.stream()
+                .skip((long) page * size)
+                .limit(size)
                 .map(PostResponse::from)
                 .toList();
     }
