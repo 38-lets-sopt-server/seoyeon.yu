@@ -2,6 +2,7 @@ package org.sopt.controller;
 
 import org.sopt.dto.request.CreatePostRequest;
 import org.sopt.dto.request.UpdatePostRequest;
+import org.sopt.dto.response.ApiResponse;
 import org.sopt.dto.response.CreatePostResponse;
 import org.sopt.dto.response.PostResponse;
 import org.sopt.service.PostService;
@@ -21,47 +22,48 @@ public class PostController {
         this.postService = postService;
     }
 
-    // POST /posts ✅ 같이 구현
+    // POST /posts
     @PostMapping
-    public ResponseEntity<CreatePostResponse> createPost(
+    public ResponseEntity<ApiResponse<CreatePostResponse>> createPost(
             @RequestBody CreatePostRequest request
     ) {
         CreatePostResponse response = postService.createPost(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("게시글이 생성되었습니다.", response));
     }
 
-    // GET /posts 📝 과제
+    // GET /posts
     @GetMapping
-    public ResponseEntity<List<PostResponse>> getAllPosts() {
-        // TODO
-        return null;
+    public ResponseEntity<ApiResponse<List<PostResponse>>> getAllPosts() {
+        List<PostResponse> response = postService.getAllPosts();
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    // GET /posts/{id} 📝 과제
+    // GET /posts/{id}
     @GetMapping("/{id}")
-    public ResponseEntity<PostResponse> getPost(
+    public ResponseEntity<ApiResponse<PostResponse>> getPost(
             @PathVariable Long id
     ) {
-        // TODO
-        return null;
+        PostResponse response = postService.getPost(id);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    // PUT /posts/{id} 📝 과제
+    // PUT /posts/{id}
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updatePost(
+    public ResponseEntity<ApiResponse<Void>> updatePost(
             @PathVariable Long id,
             @RequestBody UpdatePostRequest request
     ) {
-        // TODO
-        return null;
+        postService.updatePost(id, request);
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 
-    // DELETE /posts/{id} 📝 과제
+    // DELETE /posts/{id}
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(
+    public ResponseEntity<ApiResponse<Void>> deletePost(
             @PathVariable Long id
     ) {
-        // TODO
-        return null;
+        postService.deletePost(id);
+        return ResponseEntity.ok(ApiResponse.success("게시글이 삭제되었습니다.", null));
     }
 }
