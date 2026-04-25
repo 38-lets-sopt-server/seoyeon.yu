@@ -1,14 +1,19 @@
 package org.sopt.service;
 
+
 import org.sopt.domain.Post;
+import org.sopt.domain.User;
 import org.sopt.dto.request.CreatePostRequest;
 import org.sopt.dto.request.UpdatePostRequest;
 import org.sopt.dto.response.CreatePostResponse;
 import org.sopt.dto.response.PostResponse;
 import org.sopt.exception.PostNotFoundException;
+import org.sopt.exception.UserNotFoundException;
 import org.sopt.repository.PostRepository;
+import org.sopt.repository.UserRepository;
 import org.sopt.validator.PostValidator;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -16,31 +21,30 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
     private final PostValidator postValidator;
 
-    public PostService(PostRepository postRepository, PostValidator postValidator) {
+    public PostService(PostRepository postRepository, UserRepository userRepository, PostValidator postValidator) {
         this.postRepository = postRepository;
+        this.userRepository = userRepository;
         this.postValidator = postValidator;
     }
 
     // CREATE
+    @Transactional
     public CreatePostResponse createPost(CreatePostRequest request) {
         postValidator.validateTitle(request.title());
 
-        String createdAt = java.time.LocalDateTime.now().toString();
-        Post post = new Post(
-                postRepository.generateId(),
-                request.title(),
-                request.content(),
-                request.author(),
-                createdAt
-        );
+        User user = userRepository.findById(request.userId())
+                .orElseThrow(() -> new UserNotFoundException());
 
+        Post post = new Post(request.title(), request.content(), user);
         postRepository.save(post);
         return new CreatePostResponse(post.getId());
     }
 
     // READ ALL
+    @Transactional(readOnly = true)
     public List<PostResponse> getAllPosts(int page, int size) {
         List<Post> allPosts = postRepository.findAll();
 
@@ -52,6 +56,7 @@ public class PostService {
     }
 
     // READ ONE
+    @Transactional(readOnly = true)
     public PostResponse getPost(Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new PostNotFoundException(id));
@@ -59,6 +64,7 @@ public class PostService {
     }
 
     // UPDATE
+    @Transactional
     public void updatePost(Long id, UpdatePostRequest request) {
         postValidator.validateTitle(request.title());
 
@@ -69,9 +75,8 @@ public class PostService {
 
     // DELETE
     public void deletePost(Long id) {
-        boolean deleted = postRepository.deleteById(id);
-        if (!deleted) {
-            throw new PostNotFoundException(id);
-        }
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new PostNotFoundException(id));
+        postRepository.delete(post);
     }
 }
