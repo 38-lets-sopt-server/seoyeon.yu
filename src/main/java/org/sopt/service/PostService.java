@@ -12,6 +12,9 @@ import org.sopt.exception.UserNotFoundException;
 import org.sopt.repository.PostRepository;
 import org.sopt.repository.UserRepository;
 import org.sopt.validator.PostValidator;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,14 +48,10 @@ public class PostService {
 
     // READ ALL
     @Transactional(readOnly = true)
-    public List<PostResponse> getAllPosts(int page, int size) {
-        List<Post> allPosts = postRepository.findAll();
-
-        return allPosts.stream()
-                .skip((long) page * size)
-                .limit(size)
-                .map(PostResponse::from)
-                .toList();
+    public Page<PostResponse> getAllPosts(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return postRepository.findAll(pageable)
+                .map(PostResponse::from);
     }
 
     // READ ONE
