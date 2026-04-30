@@ -33,10 +33,10 @@ public class PostService {
     // CREATE
     @Transactional
     public CreatePostResponse createPost(CreatePostRequest request) {
-        postValidator.validateTitle(request.title());
-
         User user = userRepository.findById(request.userId())
-                .orElseThrow(() -> new UserNotFoundException());
+                .orElseThrow(UserNotFoundException::new);
+
+        postValidator.validateTitle(request.title());
 
         Post post = new Post(request.title(), request.content(), user);
         postRepository.save(post);
@@ -66,13 +66,13 @@ public class PostService {
     // UPDATE
     @Transactional
     public void updatePost(Long id, UpdatePostRequest request) {
-        postValidator.validateTitle(request.title());
-
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new PostNotFoundException(id));
+
+        postValidator.validateTitle(request.title());
+
         post.update(request.title(), request.content());
     }
-
     // DELETE
     public void deletePost(Long id) {
         Post post = postRepository.findById(id)
