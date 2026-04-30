@@ -12,6 +12,9 @@ import org.sopt.exception.UserNotFoundException;
 import org.sopt.repository.PostRepository;
 import org.sopt.repository.UserRepository;
 import org.sopt.validator.PostValidator;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,10 +36,10 @@ public class PostService {
     // CREATE
     @Transactional
     public CreatePostResponse createPost(CreatePostRequest request) {
-        postValidator.validateTitle(request.title());
-
         User user = userRepository.findById(request.userId())
-                .orElseThrow(() -> new UserNotFoundException());
+                .orElseThrow(UserNotFoundException::new);
+
+        postValidator.validateTitle(request.title());
 
         Post post = new Post(request.title(), request.content(), user);
         postRepository.save(post);
@@ -45,14 +48,10 @@ public class PostService {
 
     // READ ALL
     @Transactional(readOnly = true)
-    public List<PostResponse> getAllPosts(int page, int size) {
-        List<Post> allPosts = postRepository.findAll();
-
-        return allPosts.stream()
-                .skip((long) page * size)
-                .limit(size)
-                .map(PostResponse::from)
-                .toList();
+    public Page<PostResponse> getAllPosts(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return postRepository.findAll(pageable)
+                .map(PostResponse::from);
     }
 
     // READ ONE
@@ -66,13 +65,13 @@ public class PostService {
     // UPDATE
     @Transactional
     public void updatePost(Long id, UpdatePostRequest request) {
-        postValidator.validateTitle(request.title());
-
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new PostNotFoundException(id));
+
+        postValidator.validateTitle(request.title());
+
         post.update(request.title(), request.content());
     }
-
     // DELETE
     public void deletePost(Long id) {
         Post post = postRepository.findById(id)

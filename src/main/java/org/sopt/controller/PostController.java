@@ -1,11 +1,14 @@
 package org.sopt.controller;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.sopt.dto.request.CreatePostRequest;
 import org.sopt.dto.request.UpdatePostRequest;
 import org.sopt.dto.response.BaseResponse;
 import org.sopt.dto.response.CreatePostResponse;
 import org.sopt.dto.response.PostResponse;
 import org.sopt.service.PostService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,11 +37,11 @@ public class PostController {
 
     // GET /posts
     @GetMapping
-    public ResponseEntity<BaseResponse<List<PostResponse>>> getAllPosts(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+    public ResponseEntity<BaseResponse<Page<PostResponse>>> getAllPosts(
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size
     ) {
-        List<PostResponse> response = postService.getAllPosts(page, size);
+        Page<PostResponse> response = postService.getAllPosts(page, size);
         return ResponseEntity.ok(BaseResponse.success(response));
     }
 

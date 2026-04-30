@@ -4,9 +4,18 @@ import org.sopt.dto.response.BaseResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(BaseException.class)
+    public ResponseEntity<BaseResponse<Void>> handleBaseException(BaseException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(BaseResponse.error(errorCode.toMessage()));
+    }
 
     @ExceptionHandler(PostNotFoundException.class)
     public ResponseEntity<BaseResponse<Void>> handlePostNotFound(PostNotFoundException e) {
@@ -15,6 +24,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(errorCode.getHttpStatus())
                 .body(BaseResponse.error(errorCode.toMessage()));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<BaseResponse<Void>> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
+        return ResponseEntity
+                .status(ErrorCode.INVALID_TYPE.getHttpStatus())
+                .body(BaseResponse.error(ErrorCode.INVALID_TYPE.toMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
