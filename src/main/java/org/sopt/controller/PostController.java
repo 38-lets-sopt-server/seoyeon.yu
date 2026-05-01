@@ -2,6 +2,8 @@ package org.sopt.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,8 +35,10 @@ public class PostController {
     @Operation(summary = "게시글 생성", description = "새로운 게시글을 생성합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "게시글 생성 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 입력값입니다."),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류가 발생했습니다.")
+            @ApiResponse(responseCode = "400", description = "잘못된 입력값입니다.",
+                    content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = BaseResponse.class)))
     })
     @PostMapping
     public ResponseEntity<BaseResponse<CreatePostResponse>> createPost(
@@ -49,8 +53,11 @@ public class PostController {
     @Operation(summary = "게시글 전체 조회", description = "게시글 목록을 페이지네이션으로 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "게시글 목록 조회 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 입력값입니다."),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류가 발생했습니다.")
+            @ApiResponse(responseCode = "400", description = "잘못된 입력값입니다.",
+                    content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+
     })
     @GetMapping
     public ResponseEntity<BaseResponse<Page<PostResponse>>> getAllPosts(
@@ -68,9 +75,12 @@ public class PostController {
     @Operation(summary = "게시글 단건 조회", description = "게시글 id로 특정 게시글을 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "게시글 단건 조회 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 타입의 요청값입니다."),
-            @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없습니다."),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류가 발생했습니다.")
+            @ApiResponse(responseCode = "400", description = "잘못된 타입의 요청값입니다.",
+                    content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없습니다.",
+                    content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = BaseResponse.class)))
     })
     @GetMapping("/{id}")
     public ResponseEntity<BaseResponse<PostResponse>> getPost(
@@ -85,9 +95,12 @@ public class PostController {
     @Operation(summary = "게시글 수정", description = "게시글 id로 특정 게시글의 제목과 내용을 수정합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "게시글 수정 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 입력값입니다."),
-            @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없습니다."),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류가 발생했습니다.")
+            @ApiResponse(responseCode = "400", description = "잘못된 입력값입니다.",
+                    content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없습니다.",
+                    content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = BaseResponse.class)))
     })
     @PutMapping("/{id}")
     public ResponseEntity<BaseResponse<Void>> updatePost(
@@ -103,9 +116,10 @@ public class PostController {
     @Operation(summary = "게시글 삭제", description = "게시글 id로 특정 게시글을 삭제합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "게시글 삭제 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 타입의 요청값입니다."),
-            @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없습니다."),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류가 발생했습니다.")
+            @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없습니다.",
+                    content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = BaseResponse.class)))
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<BaseResponse<Void>> deletePost(
