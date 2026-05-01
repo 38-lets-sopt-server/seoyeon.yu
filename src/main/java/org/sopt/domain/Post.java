@@ -3,7 +3,7 @@ package org.sopt.domain;
 import jakarta.persistence.*;
 
 @Entity
-public class Post {
+public class Post extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,5 +44,4 @@ public class Post {
         this.title = title;
         this.content = content;
     }
-
 }
