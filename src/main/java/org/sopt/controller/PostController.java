@@ -1,5 +1,8 @@
 package org.sopt.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import org.sopt.dto.request.CreatePostRequest;
@@ -13,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Post", description = "게시글 API")
 @RestController
 @RequestMapping("/posts")
 public class PostController {
@@ -24,6 +28,7 @@ public class PostController {
     }
 
     // POST /posts
+    @Operation(summary = "게시글 생성", description = "새로운 게시글을 생성합니다.")
     @PostMapping
     public ResponseEntity<BaseResponse<CreatePostResponse>> createPost(
             @RequestBody CreatePostRequest request
@@ -34,9 +39,13 @@ public class PostController {
     }
 
     // GET /posts
+    @Operation(summary = "게시글 전체 조회", description = "게시글 목록을 페이지네이션으로 조회합니다.")
     @GetMapping
     public ResponseEntity<BaseResponse<Page<PostResponse>>> getAllPosts(
+            @Parameter(description = "페이지 번호", example = "0")
             @RequestParam(defaultValue = "0") @Min(0) int page,
+
+            @Parameter(description = "페이지 크기", example = "10")
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size
     ) {
         Page<PostResponse> response = postService.getAllPosts(page, size);
@@ -44,8 +53,10 @@ public class PostController {
     }
 
     // GET /posts/{id}
+    @Operation(summary = "게시글 단건 조회", description = "게시글 id로 특정 게시글을 조회합니다.")
     @GetMapping("/{id}")
     public ResponseEntity<BaseResponse<PostResponse>> getPost(
+            @Parameter(description = "게시글 id", example = "1")
             @PathVariable Long id
     ) {
         PostResponse response = postService.getPost(id);
@@ -53,8 +64,10 @@ public class PostController {
     }
 
     // PUT /posts/{id}
+    @Operation(summary = "게시글 수정", description = "게시글 id로 특정 게시글의 제목과 내용을 수정합니다.")
     @PutMapping("/{id}")
     public ResponseEntity<BaseResponse<Void>> updatePost(
+            @Parameter(description = "게시글 id", example = "1")
             @PathVariable Long id,
             @RequestBody UpdatePostRequest request
     ) {
@@ -63,8 +76,10 @@ public class PostController {
     }
 
     // DELETE /posts/{id}
+    @Operation(summary = "게시글 삭제", description = "게시글 id로 특정 게시글을 삭제합니다.")
     @DeleteMapping("/{id}")
     public ResponseEntity<BaseResponse<Void>> deletePost(
+            @Parameter(description = "게시글 id", example = "1")
             @PathVariable Long id
     ) {
         postService.deletePost(id);
