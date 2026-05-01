@@ -3,7 +3,7 @@ package org.sopt.domain;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "users")  // "user"는 SQL 예약어라 테이블명을 변경해요
+@Table(name = "users")
 public class User {
 
     @Id

@@ -11,6 +11,8 @@ import org.sopt.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 public class LikeService {
 
@@ -31,12 +33,15 @@ public class LikeService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new BaseException(ErrorCode.POST_NOT_FOUND));
 
-        if (likeRepository.findByUserAndPost(user, post).isPresent()) {
-            likeRepository.findByUserAndPost(user, post)
-                    .ifPresent(likeRepository::delete);
+        Optional<Like> existingLike = likeRepository.findByUserAndPost(user, post);
+
+        if (existingLike.isPresent()) {
+            likeRepository.delete(existingLike.get());
+            post.decreaseLikeCount();
             return false;
         } else {
             likeRepository.save(new Like(user, post));
+            post.increaseLikeCount();
             return true;
         }
     }

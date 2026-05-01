@@ -2,7 +2,6 @@ package org.sopt.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.sopt.domain.Post;
-import org.sopt.domain.User;
 
 import java.time.LocalDateTime;
 
@@ -16,6 +15,9 @@ public record PostResponse(
         @Schema(description = "게시글 작성자 닉네임", example = "익명")
         String author,
 
+        @Schema(description = "좋아요 수", example = "0")
+        int likeCount,
+
         @Schema(description = "게시글 생성일")
         LocalDateTime createdAt
 ) {
@@ -24,6 +26,7 @@ public record PostResponse(
                 post.getTitle(),
                 post.getContent(),
                 post.getUser().getNickname(),
+                post.getLikeCount(),
                 post.getCreatedAt()
         );
     }
