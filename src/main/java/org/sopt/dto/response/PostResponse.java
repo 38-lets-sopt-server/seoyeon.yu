@@ -13,8 +13,8 @@ public record PostResponse(
         @Schema(description = "게시글 내용", example = "내용입니다.")
         String content,
 
-        @Schema(description = "게시글 작성자 정보")
-        User user,
+        @Schema(description = "게시글 작성자 닉네임", example = "익명")
+        String author,
 
         @Schema(description = "게시글 생성일")
         LocalDateTime createdAt
@@ -23,7 +23,7 @@ public record PostResponse(
         return new PostResponse(
                 post.getTitle(),
                 post.getContent(),
-                post.getUser(),
+                post.getUser().getNickname(),
                 post.getCreatedAt()
         );
     }
