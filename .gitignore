@@ -42,6 +42,3 @@ bin/
 
 ### Mac OS ###
 .DS_Store
-
-### Application config ###
-src/main/resources/application.yml
