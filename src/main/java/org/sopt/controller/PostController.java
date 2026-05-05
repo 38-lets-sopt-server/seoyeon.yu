@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import org.sopt.dto.request.CreatePostRequest;
@@ -42,7 +43,7 @@ public class PostController {
     })
     @PostMapping
     public ResponseEntity<BaseResponse<CreatePostResponse>> createPost(
-            @RequestBody CreatePostRequest request
+            @Valid @RequestBody CreatePostRequest request
     ) {
         CreatePostResponse response = postService.createPost(request);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -106,7 +107,7 @@ public class PostController {
     public ResponseEntity<BaseResponse<Void>> updatePost(
             @Parameter(description = "게시글 id", example = "1")
             @PathVariable Long id,
-            @RequestBody UpdatePostRequest request
+            @Valid @RequestBody UpdatePostRequest request
     ) {
         postService.updatePost(id, request);
         return ResponseEntity.ok(BaseResponse.success(null));

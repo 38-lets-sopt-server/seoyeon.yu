@@ -1,6 +1,5 @@
 package org.sopt.service;
 
-
 import org.sopt.domain.Post;
 import org.sopt.domain.User;
 import org.sopt.dto.request.CreatePostRequest;
@@ -9,6 +8,7 @@ import org.sopt.dto.response.CreatePostResponse;
 import org.sopt.dto.response.PostResponse;
 import org.sopt.exception.PostNotFoundException;
 import org.sopt.exception.UserNotFoundException;
+import org.sopt.repository.LikeRepository;
 import org.sopt.repository.PostRepository;
 import org.sopt.repository.UserRepository;
 import org.sopt.validator.PostValidator;
@@ -23,11 +23,13 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final LikeRepository likeRepository;
     private final PostValidator postValidator;
 
-    public PostService(PostRepository postRepository, UserRepository userRepository, PostValidator postValidator) {
+    public PostService(PostRepository postRepository, UserRepository userRepository, LikeRepository likeRepository, PostValidator postValidator) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.likeRepository = likeRepository;
         this.postValidator = postValidator;
     }
 
@@ -49,7 +51,7 @@ public class PostService {
     public Page<PostResponse> getAllPosts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return postRepository.findAll(pageable)
-                .map(PostResponse::from);
+                .map(post -> PostResponse.from(post, likeRepository.countByPost(post)));
     }
 
     // READ ONE
@@ -57,7 +59,7 @@ public class PostService {
     public PostResponse getPost(Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new PostNotFoundException(id));
-        return PostResponse.from(post);
+        return PostResponse.from(post, likeRepository.countByPost(post));
     }
 
     // UPDATE

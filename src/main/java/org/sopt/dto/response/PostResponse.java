@@ -16,17 +16,17 @@ public record PostResponse(
         String author,
 
         @Schema(description = "좋아요 수", example = "0")
-        int likeCount,
+        Long likeCount,
 
         @Schema(description = "게시글 생성일")
         LocalDateTime createdAt
 ) {
-    public static PostResponse from(Post post) {
+    public static PostResponse from(Post post, Long likeCount) {
         return new PostResponse(
                 post.getTitle(),
                 post.getContent(),
                 post.getUser().getNickname(),
-                post.getLikeCount(),
+                likeCount,
                 post.getCreatedAt()
         );
     }

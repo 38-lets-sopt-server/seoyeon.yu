@@ -37,11 +37,9 @@ public class LikeService {
 
         if (existingLike.isPresent()) {
             likeRepository.delete(existingLike.get());
-            post.decreaseLikeCount();
             return false;
         } else {
             likeRepository.save(new Like(user, post));
-            post.increaseLikeCount();
             return true;
         }
     }

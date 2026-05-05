@@ -12,8 +12,6 @@ public class Post extends BaseTimeEntity {
     private String title;     // 목록, 상세, 글쓰기 화면 — 제목
     private String content;   // 목록(미리보기), 상세(전체) 화면 — 내용
 
-    private int likeCount = 0;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -47,17 +45,4 @@ public class Post extends BaseTimeEntity {
         this.content = content;
     }
 
-    public int getLikeCount() {
-        return likeCount;
-    }
-
-    public void increaseLikeCount() {
-        this.likeCount++;
-    }
-
-    public void decreaseLikeCount() {
-        if (this.likeCount > 0) {
-            this.likeCount--;
-        }
-    }
 }
