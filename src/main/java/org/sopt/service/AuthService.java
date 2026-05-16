@@ -23,7 +23,7 @@ public class AuthService {
     private long refreshTokenExpiresInSeconds;
 
     private User findByCredentials(String email, String password) {
-        User user = (User) userRepository.findByEmail(email)
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
 
         if (!user.getPassword().equals(password)) {
