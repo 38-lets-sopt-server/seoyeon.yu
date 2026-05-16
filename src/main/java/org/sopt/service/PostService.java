@@ -73,6 +73,7 @@ public class PostService {
         post.update(request.title(), request.content());
     }
     // DELETE
+    @Transactional
     public void deletePost(Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new PostNotFoundException(id));
