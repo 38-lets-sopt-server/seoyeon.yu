@@ -6,6 +6,8 @@ import org.sopt.dto.request.CreatePostRequest;
 import org.sopt.dto.request.UpdatePostRequest;
 import org.sopt.dto.response.CreatePostResponse;
 import org.sopt.dto.response.PostResponse;
+import org.sopt.exception.BaseException;
+import org.sopt.exception.ErrorCode;
 import org.sopt.exception.PostNotFoundException;
 import org.sopt.exception.UserNotFoundException;
 import org.sopt.repository.LikeRepository;
@@ -35,8 +37,8 @@ public class PostService {
 
     // CREATE
     @Transactional
-    public CreatePostResponse createPost(CreatePostRequest request) {
-        User user = userRepository.findById(request.userId())
+    public CreatePostResponse createPost(Long userId, CreatePostRequest request) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
 
         postValidator.validateTitle(request.title());
@@ -64,19 +66,29 @@ public class PostService {
 
     // UPDATE
     @Transactional
-    public void updatePost(Long id, UpdatePostRequest request) {
+    public void updatePost(Long userId, Long id, UpdatePostRequest request) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new PostNotFoundException(id));
+
+        if (!post.getUser().getId().equals(userId)) {
+            throw new BaseException(ErrorCode.FORBIDDEN);
+        }
 
         postValidator.validateTitle(request.title());
 
         post.update(request.title(), request.content());
     }
+
     // DELETE
     @Transactional
-    public void deletePost(Long id) {
+    public void deletePost(Long userId, Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new PostNotFoundException(id));
+
+        if (!post.getUser().getId().equals(userId)) {
+            throw new BaseException(ErrorCode.FORBIDDEN);
+        }
+
         postRepository.delete(post);
     }
 }

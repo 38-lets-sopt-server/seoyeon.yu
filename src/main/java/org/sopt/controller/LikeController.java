@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.sopt.dto.response.BaseResponse;
 import org.sopt.service.LikeService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Like", description = "좋아요 API")
@@ -33,12 +34,11 @@ public class LikeController {
     })
     @PatchMapping("/posts/{postId}/like")
     public ResponseEntity<BaseResponse<Void>> updateLike(
+            Authentication authentication,
             @Parameter(description = "게시글 id", example = "1", required = true)
-            @PathVariable Long postId,
-
-            @Parameter(description = "유저 id", example = "1", required = true)
-            @RequestParam Long userId
+            @PathVariable Long postId
     ) {
+        Long userId = Long.parseLong(authentication.getName());
         boolean isLiked = likeService.updateLike(userId, postId);
         String message = isLiked ? "좋아요가 추가되었습니다." : "좋아요가 취소되었습니다.";
         return ResponseEntity.ok(BaseResponse.success(message, null));

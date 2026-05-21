@@ -19,6 +19,7 @@ import org.sopt.service.PostService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Post", description = "게시글 API")
@@ -43,9 +44,11 @@ public class PostController {
     })
     @PostMapping
     public ResponseEntity<BaseResponse<CreatePostResponse>> createPost(
+            Authentication authentication,
             @Valid @RequestBody CreatePostRequest request
     ) {
-        CreatePostResponse response = postService.createPost(request);
+        Long userId = Long.parseLong(authentication.getName());
+        CreatePostResponse response = postService.createPost(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(BaseResponse.success("게시글이 생성되었습니다.", response));
     }
@@ -105,11 +108,13 @@ public class PostController {
     })
     @PutMapping("/{id}")
     public ResponseEntity<BaseResponse<Void>> updatePost(
+            Authentication authentication,
             @Parameter(description = "게시글 id", example = "1")
             @PathVariable Long id,
             @Valid @RequestBody UpdatePostRequest request
     ) {
-        postService.updatePost(id, request);
+        Long userId = Long.parseLong(authentication.getName());
+        postService.updatePost(userId, id, request);
         return ResponseEntity.ok(BaseResponse.success(null));
     }
 
@@ -124,10 +129,12 @@ public class PostController {
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<BaseResponse<Void>> deletePost(
+            Authentication authentication,
             @Parameter(description = "게시글 id", example = "1")
             @PathVariable Long id
     ) {
-        postService.deletePost(id);
+        Long userId = Long.parseLong(authentication.getName());
+        postService.deletePost(userId, id);
         return ResponseEntity.ok(BaseResponse.success("게시글이 삭제되었습니다.", null));
     }
 }
