@@ -1,8 +1,10 @@
 package org.sopt.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.sopt.dto.request.SignUpRequest;
 import org.sopt.dto.request.UserPostRequest;
 import org.sopt.dto.response.BaseResponse;
 import org.sopt.dto.response.TokenResponse;
@@ -12,12 +14,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Auth", description = "인증 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
     private final AuthService authService;
+
+    @Operation(summary = "회원가입")
+    @PostMapping("/signup")
+    public ResponseEntity<BaseResponse<UserResponse>> signUp(
+            @RequestBody @Valid SignUpRequest request
+    ) {
+        UserResponse userResponse = authService.signUp(request.nickname(), request.email(), request.password());
+        return ResponseEntity.status(201).body(BaseResponse.success("회원가입이 완료되었습니다.", userResponse));
+    }
 
     @Operation(summary = "로그인 (Access Token + Refresh Token 발급)")
     @PostMapping("/login")

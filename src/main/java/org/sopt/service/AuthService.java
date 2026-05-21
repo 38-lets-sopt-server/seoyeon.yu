@@ -5,6 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.sopt.domain.RefreshToken;
 import org.sopt.domain.User;
 import org.sopt.dto.response.TokenResponse;
+import org.sopt.dto.response.UserResponse;
+import org.sopt.exception.BaseException;
+import org.sopt.exception.ErrorCode;
 import org.sopt.repository.RefreshTokenRepository;
 import org.sopt.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +24,16 @@ public class AuthService {
 
     @Value("${security.jwt.refresh-token-expires-in-seconds:1209600}")
     private long refreshTokenExpiresInSeconds;
+
+    @Transactional
+    public UserResponse signUp(String nickname, String email, String password) {
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new BaseException(ErrorCode.EMAIL_DUPLICATE);
+        }
+        User user = new User(nickname, email, password);
+        userRepository.save(user);
+        return UserResponse.from(user);
+    }
 
     private User findByCredentials(String email, String password) {
         User user = userRepository.findByEmail(email)
