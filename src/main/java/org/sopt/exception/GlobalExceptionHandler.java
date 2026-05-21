@@ -17,15 +17,6 @@ public class GlobalExceptionHandler {
                 .body(BaseResponse.error(errorCode.toMessage()));
     }
 
-    @ExceptionHandler(PostNotFoundException.class)
-    public ResponseEntity<BaseResponse<Void>> handlePostNotFound(PostNotFoundException e) {
-        ErrorCode errorCode = e.getErrorCode();
-
-        return ResponseEntity
-                .status(errorCode.getHttpStatus())
-                .body(BaseResponse.error(errorCode.toMessage()));
-    }
-
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<BaseResponse<Void>> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
         return ResponseEntity
