@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -59,6 +61,27 @@ public class AuthService {
         );
 
         return TokenResponse.of(accessToken, refreshToken);
+    }
+
+    @Transactional
+    public TokenResponse reissue(String refreshToken) {
+        RefreshToken stored = refreshTokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new BaseException(ErrorCode.UNAUTHORIZED));
+
+        if (stored.getExpiresAt().isBefore(LocalDateTime.now())) {
+            refreshTokenRepository.delete(stored);
+            throw new BaseException(ErrorCode.UNAUTHORIZED);
+        }
+
+        User user = userRepository.findById(stored.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+
+        String newAccessToken = jwtService.generateAccessToken(user.getId(), user.getEmail());
+        String newRefreshToken = jwtService.generateRefreshToken(user.getId());
+
+        stored.rotate(newRefreshToken, refreshTokenExpiresInSeconds);
+
+        return TokenResponse.of(newAccessToken, newRefreshToken);
     }
 
     public User getUserById(Long userId) {

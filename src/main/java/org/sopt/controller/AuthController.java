@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.sopt.dto.request.ReissueTokenRequest;
 import org.sopt.dto.request.SignUpRequest;
 import org.sopt.dto.request.UserPostRequest;
 import org.sopt.dto.response.BaseResponse;
@@ -38,6 +39,15 @@ public class AuthController {
     ) {
         TokenResponse tokens = authService.login(request.email(), request.password());
 
+        return ResponseEntity.ok(BaseResponse.success(tokens));
+    }
+
+    @Operation(summary = "토큰 재발급 (Refresh Token으로 새 Access Token + Refresh Token 발급)")
+    @PostMapping("/reissue")
+    public ResponseEntity<BaseResponse<TokenResponse>> reissue(
+            @RequestBody @Valid ReissueTokenRequest request
+    ) {
+        TokenResponse tokens = authService.reissue(request.refreshToken());
         return ResponseEntity.ok(BaseResponse.success(tokens));
     }
 
