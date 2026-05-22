@@ -20,20 +20,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
     private final PostValidator postValidator;
-
-    public PostService(PostRepository postRepository, UserRepository userRepository, LikeRepository likeRepository, PostValidator postValidator) {
-        this.postRepository = postRepository;
-        this.userRepository = userRepository;
-        this.likeRepository = likeRepository;
-        this.postValidator = postValidator;
-    }
 
     // CREATE
     @Transactional

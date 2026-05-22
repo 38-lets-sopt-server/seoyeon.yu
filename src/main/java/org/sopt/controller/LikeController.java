@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.sopt.dto.response.BaseResponse;
 import org.sopt.service.LikeService;
 import org.springframework.http.ResponseEntity;
@@ -16,14 +17,11 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Like", description = "좋아요 API")
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1")
 public class LikeController {
 
     private final LikeService likeService;
-
-    public LikeController(LikeService likeService) {
-        this.likeService = likeService;
-    }
 
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "좋아요 추가/취소", description = "좋아요가 없으면 추가, 있으면 취소합니다.")
