@@ -92,8 +92,10 @@ public class AuthService {
     @Transactional
     public void logout(Long userId, String accessToken) {
         refreshTokenRepository.deleteByUserId(userId);
-        LocalDateTime expiresAt = jwtService.getExpiresAt(accessToken);
-        accessTokenBlacklistRepository.save(AccessTokenBlacklist.of(accessToken, expiresAt));
+        if (!accessTokenBlacklistRepository.existsByToken(accessToken)) {
+            LocalDateTime expiresAt = jwtService.getExpiresAt(accessToken);
+            accessTokenBlacklistRepository.save(AccessTokenBlacklist.of(accessToken, expiresAt));
+        }
     }
 
     public User getUserById(Long userId) {
