@@ -1,6 +1,7 @@
 package org.sopt.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +52,7 @@ public class AuthController {
         return ResponseEntity.ok(BaseResponse.success(tokens));
     }
 
+    @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "내 정보 조회 (Access Token 검증)")
     @GetMapping("/me")
     public ResponseEntity<BaseResponse<UserResponse>> me(Authentication authentication) {

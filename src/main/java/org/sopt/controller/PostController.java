@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -34,6 +35,7 @@ public class PostController {
     }
 
     // POST /posts
+    @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "게시글 생성", description = "새로운 게시글을 생성합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "게시글 생성 성공"),
@@ -96,6 +98,7 @@ public class PostController {
     }
 
     // PUT /posts/{id}
+    @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "게시글 수정", description = "게시글 id로 특정 게시글의 제목과 내용을 수정합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "게시글 수정 성공"),
@@ -119,6 +122,7 @@ public class PostController {
     }
 
     // DELETE /posts/{id}
+    @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "게시글 삭제", description = "게시글 id로 특정 게시글을 삭제합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "게시글 삭제 성공"),
