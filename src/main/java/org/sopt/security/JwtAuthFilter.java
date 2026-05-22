@@ -24,6 +24,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final AccessTokenBlacklistRepository blacklistRepository;
+    private final SecurityErrorHandler securityErrorHandler;
 
     @Override
     protected void doFilterInternal(
@@ -36,12 +37,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String token = header.substring("Bearer ".length()).trim();
             try {
                 Long memberId = jwtService.verifyAndGetUserId(token);
-                if (!blacklistRepository.existsByToken(token)) {
-                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                            String.valueOf(memberId), null, Collections.emptyList());
-                    auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(auth);
+                if (blacklistRepository.existsByToken(token)) {
+                    securityErrorHandler.sendUnauthorized(response);
+                    return;
                 }
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                        String.valueOf(memberId), null, Collections.emptyList());
+                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(auth);
             } catch (IllegalArgumentException | JWTVerificationException e) {
                 // 유효하지 않은 토큰 또는 토큰이 없는 경우, 인증 없이 다음 필터로 넘겨요.
                 // 여기서 예외를 던지지 않는 이유는, /v1/login 같이 인증이 필요 없는 API도

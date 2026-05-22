@@ -31,6 +31,10 @@ public class SecurityErrorHandler implements AuthenticationEntryPoint, AccessDen
         writeError(response, ErrorCode.AUTH_FORBIDDEN);
     }
 
+    public void sendUnauthorized(HttpServletResponse response) throws IOException {
+        writeError(response, ErrorCode.AUTH_UNAUTHORIZED);
+    }
+
     private void writeError(HttpServletResponse response, ErrorCode errorCode) throws IOException {
         response.setStatus(errorCode.getHttpStatus().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
