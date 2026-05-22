@@ -11,6 +11,7 @@ import org.sopt.exception.ErrorCode;
 import org.sopt.repository.RefreshTokenRepository;
 import org.sopt.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtService jwtService;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Value("${security.jwt.refresh-token-expires-in-seconds:1209600}")
     private long refreshTokenExpiresInSeconds;
@@ -32,7 +34,7 @@ public class AuthService {
         if (userRepository.findByEmail(email).isPresent()) {
             throw new BaseException(ErrorCode.EMAIL_DUPLICATE);
         }
-        User user = new User(nickname, email, password);
+        User user = new User(nickname, email, passwordEncoder.encode(password));
         userRepository.save(user);
         return UserResponse.from(user);
     }
@@ -41,7 +43,7 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
 
-        if (!user.getPassword().equals(password)) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
         }
 
