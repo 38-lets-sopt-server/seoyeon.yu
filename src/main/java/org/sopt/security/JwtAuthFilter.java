@@ -1,4 +1,4 @@
-package org.sopt.config;
+package org.sopt.security;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import jakarta.servlet.FilterChain;

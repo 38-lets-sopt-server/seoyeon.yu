@@ -1,4 +1,4 @@
-package org.sopt.config;
+package org.sopt.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
