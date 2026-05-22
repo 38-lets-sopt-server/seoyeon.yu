@@ -13,7 +13,6 @@ import org.sopt.exception.UserNotFoundException;
 import org.sopt.repository.LikeRepository;
 import org.sopt.repository.PostRepository;
 import org.sopt.repository.UserRepository;
-import org.sopt.validator.PostValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,15 +28,12 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
-    private final PostValidator postValidator;
 
     // CREATE
     @Transactional
     public CreatePostResponse createPost(Long userId, CreatePostRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
-
-        postValidator.validateTitle(request.title());
 
         Post post = new Post(request.title(), request.content(), user);
         postRepository.save(post);
@@ -69,8 +65,6 @@ public class PostService {
         if (!post.getUser().getId().equals(userId)) {
             throw new BaseException(ErrorCode.AUTH_FORBIDDEN);
         }
-
-        postValidator.validateTitle(request.title());
 
         post.update(request.title(), request.content());
     }
