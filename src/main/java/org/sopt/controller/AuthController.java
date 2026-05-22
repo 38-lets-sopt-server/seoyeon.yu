@@ -56,11 +56,6 @@ public class AuthController {
     @Operation(summary = "내 정보 조회 (Access Token 검증)")
     @GetMapping("/me")
     public ResponseEntity<BaseResponse<UserResponse>> me(Authentication authentication) {
-
-        if (authentication == null || authentication.getPrincipal() == null) {
-            throw new IllegalArgumentException("인증되지 않았습니다.");
-        }
-
         Long memberId = Long.parseLong(authentication.getName());
         UserResponse userResponse = UserResponse.from(authService.getUserById(memberId));
 
