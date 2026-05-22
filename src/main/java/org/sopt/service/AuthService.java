@@ -2,12 +2,14 @@ package org.sopt.service;
 
 import lombok.RequiredArgsConstructor;
 
+import org.sopt.domain.AccessTokenBlacklist;
 import org.sopt.domain.RefreshToken;
 import org.sopt.domain.User;
 import org.sopt.dto.response.TokenResponse;
 import org.sopt.dto.response.UserResponse;
 import org.sopt.exception.BaseException;
 import org.sopt.exception.ErrorCode;
+import org.sopt.repository.AccessTokenBlacklistRepository;
 import org.sopt.repository.RefreshTokenRepository;
 import org.sopt.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +25,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final AccessTokenBlacklistRepository accessTokenBlacklistRepository;
     private final JwtService jwtService;
     private final BCryptPasswordEncoder passwordEncoder;
 
@@ -84,6 +87,13 @@ public class AuthService {
         stored.rotate(newRefreshToken, refreshTokenExpiresInSeconds);
 
         return TokenResponse.of(newAccessToken, newRefreshToken);
+    }
+
+    @Transactional
+    public void logout(Long userId, String accessToken) {
+        refreshTokenRepository.deleteByUserId(userId);
+        LocalDateTime expiresAt = jwtService.getExpiresAt(accessToken);
+        accessTokenBlacklistRepository.save(AccessTokenBlacklist.of(accessToken, expiresAt));
     }
 
     public User getUserById(Long userId) {

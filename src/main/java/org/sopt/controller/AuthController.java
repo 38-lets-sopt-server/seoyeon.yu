@@ -12,9 +12,12 @@ import org.sopt.dto.response.BaseResponse;
 import org.sopt.dto.response.TokenResponse;
 import org.sopt.dto.response.UserResponse;
 import org.sopt.service.AuthService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Tag(name = "Auth", description = "인증 API")
 @RestController
@@ -33,17 +36,17 @@ public class AuthController {
         return ResponseEntity.status(201).body(BaseResponse.success("회원가입이 완료되었습니다.", userResponse));
     }
 
-    @Operation(summary = "로그인 (Access Token + Refresh Token 발급)")
+    @Operation(summary = "로그인")
     @PostMapping("/login")
     public ResponseEntity<BaseResponse<TokenResponse>> login(
             @RequestBody @Valid UserPostRequest request
     ) {
         TokenResponse tokens = authService.login(request.email(), request.password());
 
-        return ResponseEntity.ok(BaseResponse.success(tokens));
+        return ResponseEntity.ok(BaseResponse.success("성공적으로 로그인되었습니다.", tokens));
     }
 
-    @Operation(summary = "토큰 재발급 (Refresh Token으로 새 Access Token + Refresh Token 발급)")
+    @Operation(summary = "토큰 재발급")
     @PostMapping("/reissue")
     public ResponseEntity<BaseResponse<TokenResponse>> reissue(
             @RequestBody @Valid ReissueTokenRequest request
@@ -53,7 +56,20 @@ public class AuthController {
     }
 
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "내 정보 조회 (Access Token 검증)")
+    @Operation(summary = "로그아웃")
+    @PostMapping("/logout")
+    public ResponseEntity<BaseResponse<Void>> logout(
+            Authentication authentication,
+            HttpServletRequest request
+    ) {
+        Long userId = Long.parseLong(authentication.getName());
+        String token = request.getHeader(HttpHeaders.AUTHORIZATION).substring("Bearer ".length()).trim();
+        authService.logout(userId, token);
+        return ResponseEntity.ok(BaseResponse.success("성공적으로 로그아웃되었습니다.", null));
+    }
+
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "내 정보 조회")
     @GetMapping("/me")
     public ResponseEntity<BaseResponse<UserResponse>> me(Authentication authentication) {
         Long memberId = Long.parseLong(authentication.getName());
