@@ -22,13 +22,13 @@ public class SecurityErrorHandler implements AuthenticationEntryPoint, AccessDen
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
-        writeError(response, ErrorCode.UNAUTHORIZED);
+        writeError(response, ErrorCode.AUTH_UNAUTHORIZED);
     }
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response,
                        AccessDeniedException accessDeniedException) throws IOException {
-        writeError(response, ErrorCode.FORBIDDEN);
+        writeError(response, ErrorCode.AUTH_FORBIDDEN);
     }
 
     private void writeError(HttpServletResponse response, ErrorCode errorCode) throws IOException {

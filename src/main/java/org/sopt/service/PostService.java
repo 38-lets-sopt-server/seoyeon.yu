@@ -67,7 +67,7 @@ public class PostService {
                 .orElseThrow(() -> new PostNotFoundException(id));
 
         if (!post.getUser().getId().equals(userId)) {
-            throw new BaseException(ErrorCode.FORBIDDEN);
+            throw new BaseException(ErrorCode.AUTH_FORBIDDEN);
         }
 
         postValidator.validateTitle(request.title());
@@ -82,7 +82,7 @@ public class PostService {
                 .orElseThrow(() -> new PostNotFoundException(id));
 
         if (!post.getUser().getId().equals(userId)) {
-            throw new BaseException(ErrorCode.FORBIDDEN);
+            throw new BaseException(ErrorCode.AUTH_FORBIDDEN);
         }
 
         postRepository.delete(post);

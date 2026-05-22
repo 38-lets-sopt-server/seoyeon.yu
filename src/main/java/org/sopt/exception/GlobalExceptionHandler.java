@@ -20,21 +20,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<BaseResponse<Void>> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
         return ResponseEntity
-                .status(ErrorCode.INVALID_TYPE.getHttpStatus())
-                .body(BaseResponse.error(ErrorCode.INVALID_TYPE.toMessage()));
+                .status(ErrorCode.COMMON_INVALID_TYPE.getHttpStatus())
+                .body(BaseResponse.error(ErrorCode.COMMON_INVALID_TYPE.toMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<BaseResponse<Void>> handleIllegalArgument(IllegalArgumentException e) {
         return ResponseEntity
-                .status(ErrorCode.INVALID_INPUT.getHttpStatus())
-                .body(BaseResponse.error(ErrorCode.INVALID_INPUT.toMessage()));
+                .status(ErrorCode.COMMON_INVALID_INPUT.getHttpStatus())
+                .body(BaseResponse.error(ErrorCode.COMMON_INVALID_INPUT.toMessage()));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<BaseResponse<Void>> handleException(Exception e) {
         return ResponseEntity
-                .status(ErrorCode.INTERNAL_SERVER_ERROR.getHttpStatus())
-                .body(BaseResponse.error(ErrorCode.INTERNAL_SERVER_ERROR.toMessage()));
+                .status(ErrorCode.COMMON_INTERNAL_SERVER_ERROR.getHttpStatus())
+                .body(BaseResponse.error(ErrorCode.COMMON_INTERNAL_SERVER_ERROR.toMessage()));
     }
 }

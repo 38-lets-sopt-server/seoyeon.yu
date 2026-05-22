@@ -32,7 +32,7 @@ public class AuthService {
     @Transactional
     public UserResponse signUp(String nickname, String email, String password) {
         if (userRepository.findByEmail(email).isPresent()) {
-            throw new BaseException(ErrorCode.EMAIL_DUPLICATE);
+            throw new BaseException(ErrorCode.USER_EMAIL_DUPLICATE);
         }
         User user = new User(nickname, email, passwordEncoder.encode(password));
         userRepository.save(user);
@@ -41,10 +41,10 @@ public class AuthService {
 
     private User findByCredentials(String email, String password) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new BaseException(ErrorCode.AUTH_INVALID_CREDENTIALS));
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
+            throw new BaseException(ErrorCode.AUTH_INVALID_CREDENTIALS);
         }
 
         return user;
@@ -68,15 +68,15 @@ public class AuthService {
     @Transactional
     public TokenResponse reissue(String refreshToken) {
         RefreshToken stored = refreshTokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new BaseException(ErrorCode.UNAUTHORIZED));
+                .orElseThrow(() -> new BaseException(ErrorCode.AUTH_UNAUTHORIZED));
 
         if (stored.getExpiresAt().isBefore(LocalDateTime.now())) {
             refreshTokenRepository.delete(stored);
-            throw new BaseException(ErrorCode.UNAUTHORIZED);
+            throw new BaseException(ErrorCode.AUTH_UNAUTHORIZED);
         }
 
         User user = userRepository.findById(stored.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
         String newAccessToken = jwtService.generateAccessToken(user.getId(), user.getEmail());
         String newRefreshToken = jwtService.generateRefreshToken(user.getId());
@@ -88,6 +88,6 @@ public class AuthService {
 
     public User getUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
     }
 }
