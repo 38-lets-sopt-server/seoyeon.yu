@@ -60,7 +60,7 @@ public class JwtService {
     }
 
     public LocalDateTime getExpiresAt(String token) {
-        DecodedJWT jwt = JWT.require(algorithm).build().verify(token);
+        DecodedJWT jwt = JWT.decode(token);
         return jwt.getExpiresAt().toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDateTime();
