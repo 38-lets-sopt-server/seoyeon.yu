@@ -11,6 +11,8 @@ import org.sopt.dto.request.UserPostRequest;
 import org.sopt.dto.response.BaseResponse;
 import org.sopt.dto.response.TokenResponse;
 import org.sopt.dto.response.UserResponse;
+import org.sopt.exception.BaseException;
+import org.sopt.exception.ErrorCode;
 import org.sopt.service.AuthService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -63,9 +65,17 @@ public class AuthController {
             HttpServletRequest request
     ) {
         Long userId = Long.parseLong(authentication.getName());
-        String token = request.getHeader(HttpHeaders.AUTHORIZATION).substring("Bearer ".length()).trim();
+        String token = extractBearerToken(request);
         authService.logout(userId, token);
         return ResponseEntity.ok(BaseResponse.success("성공적으로 로그아웃되었습니다.", null));
+    }
+
+    private String extractBearerToken(HttpServletRequest request) {
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (header == null || !header.startsWith("Bearer ")) {
+            throw new BaseException(ErrorCode.AUTH_UNAUTHORIZED);
+        }
+        return header.substring("Bearer ".length()).trim();
     }
 
     @SecurityRequirement(name = "bearerAuth")
