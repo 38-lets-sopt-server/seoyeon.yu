@@ -42,7 +42,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     return;
                 }
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                        String.valueOf(memberId), null, Collections.emptyList());
+                        memberId, null, Collections.emptyList());
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
             } catch (IllegalArgumentException | JWTVerificationException e) {

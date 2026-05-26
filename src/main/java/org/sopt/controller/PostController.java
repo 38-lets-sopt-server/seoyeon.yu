@@ -47,7 +47,7 @@ public class PostController {
             Authentication authentication,
             @Valid @RequestBody CreatePostRequest request
     ) {
-        Long userId = Long.parseLong(authentication.getName());
+        Long userId = (Long) authentication.getPrincipal();
         CreatePostResponse response = postService.createPost(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(BaseResponse.success("게시글이 생성되었습니다.", response));
@@ -114,7 +114,7 @@ public class PostController {
             @PathVariable Long id,
             @Valid @RequestBody UpdatePostRequest request
     ) {
-        Long userId = Long.parseLong(authentication.getName());
+        Long userId = (Long) authentication.getPrincipal();
         postService.updatePost(userId, id, request);
         return ResponseEntity.ok(BaseResponse.success(null));
     }
@@ -135,7 +135,7 @@ public class PostController {
             @Parameter(description = "게시글 id", example = "1")
             @PathVariable Long id
     ) {
-        Long userId = Long.parseLong(authentication.getName());
+        Long userId = (Long) authentication.getPrincipal();
         postService.deletePost(userId, id);
         return ResponseEntity.ok(BaseResponse.success("게시글이 삭제되었습니다.", null));
     }

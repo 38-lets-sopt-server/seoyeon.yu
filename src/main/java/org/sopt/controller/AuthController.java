@@ -64,7 +64,7 @@ public class AuthController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long userId = Long.parseLong(authentication.getName());
+        Long userId = (Long) authentication.getPrincipal();
         String token = extractBearerToken(request);
         authService.logout(userId, token);
         return ResponseEntity.ok(BaseResponse.success("성공적으로 로그아웃되었습니다.", null));
@@ -82,7 +82,7 @@ public class AuthController {
     @Operation(summary = "내 정보 조회")
     @GetMapping("/me")
     public ResponseEntity<BaseResponse<UserResponse>> me(Authentication authentication) {
-        Long memberId = Long.parseLong(authentication.getName());
+        Long memberId = (Long) authentication.getPrincipal();
         UserResponse userResponse = UserResponse.from(authService.getUserById(memberId));
 
         return ResponseEntity.ok(BaseResponse.success(userResponse));

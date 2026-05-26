@@ -38,7 +38,7 @@ public class LikeController {
             @Parameter(description = "게시글 id", example = "1", required = true)
             @PathVariable Long postId
     ) {
-        Long userId = Long.parseLong(authentication.getName());
+        Long userId = (Long) authentication.getPrincipal();
         boolean isLiked = likeService.updateLike(userId, postId);
         String message = isLiked ? "좋아요가 추가되었습니다." : "좋아요가 취소되었습니다.";
         return ResponseEntity.ok(BaseResponse.success(message, null));
