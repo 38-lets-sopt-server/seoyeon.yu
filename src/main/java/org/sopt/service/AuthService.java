@@ -1,5 +1,6 @@
 package org.sopt.service;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import lombok.RequiredArgsConstructor;
 
 import org.sopt.domain.AccessTokenBlacklist;
@@ -70,15 +71,17 @@ public class AuthService {
 
     @Transactional
     public TokenResponse reissue(String refreshToken) {
-        RefreshToken stored = refreshTokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new BaseException(ErrorCode.AUTH_UNAUTHORIZED));
-
-        if (stored.getExpiresAt().isBefore(LocalDateTime.now())) {
-            refreshTokenRepository.delete(stored);
+        Long userId;
+        try {
+            userId = jwtService.verifyAndGetUserId(refreshToken);
+        } catch (IllegalArgumentException | JWTVerificationException e) {
             throw new BaseException(ErrorCode.AUTH_UNAUTHORIZED);
         }
 
-        User user = userRepository.findById(stored.getUserId())
+        RefreshToken stored = refreshTokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new BaseException(ErrorCode.AUTH_UNAUTHORIZED));
+
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
         String newAccessToken = jwtService.generateAccessToken(user.getId(), user.getEmail());
