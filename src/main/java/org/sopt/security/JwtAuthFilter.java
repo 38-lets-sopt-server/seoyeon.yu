@@ -1,4 +1,4 @@
-package org.sopt.config;
+package org.sopt.security;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import jakarta.servlet.FilterChain;
@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.sopt.repository.AccessTokenBlacklistRepository;
 import org.sopt.service.JwtService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,6 +23,8 @@ import java.util.Collections;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final AccessTokenBlacklistRepository blacklistRepository;
+    private final SecurityErrorHandler securityErrorHandler;
 
     @Override
     protected void doFilterInternal(
@@ -34,8 +37,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String token = header.substring("Bearer ".length()).trim();
             try {
                 Long memberId = jwtService.verifyAndGetUserId(token);
+                if (blacklistRepository.existsByToken(token)) {
+                    securityErrorHandler.sendUnauthorized(response);
+                    return;
+                }
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                        String.valueOf(memberId), null, Collections.emptyList());
+                        memberId, null, Collections.emptyList());
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
             } catch (IllegalArgumentException | JWTVerificationException e) {

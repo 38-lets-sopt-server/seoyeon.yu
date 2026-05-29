@@ -1,7 +1,9 @@
 package org.sopt.exception;
 
 import org.sopt.dto.response.BaseResponse;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -17,33 +19,38 @@ public class GlobalExceptionHandler {
                 .body(BaseResponse.error(errorCode.toMessage()));
     }
 
-    @ExceptionHandler(PostNotFoundException.class)
-    public ResponseEntity<BaseResponse<Void>> handlePostNotFound(PostNotFoundException e) {
-        ErrorCode errorCode = e.getErrorCode();
-
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<BaseResponse<Void>> handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
         return ResponseEntity
-                .status(errorCode.getHttpStatus())
-                .body(BaseResponse.error(errorCode.toMessage()));
+                .status(ErrorCode.COMMON_INVALID_INPUT.getHttpStatus())
+                .body(BaseResponse.error(ErrorCode.COMMON_INVALID_INPUT.toMessage()));
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<BaseResponse<Void>> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
         return ResponseEntity
-                .status(ErrorCode.INVALID_TYPE.getHttpStatus())
-                .body(BaseResponse.error(ErrorCode.INVALID_TYPE.toMessage()));
+                .status(ErrorCode.COMMON_INVALID_TYPE.getHttpStatus())
+                .body(BaseResponse.error(ErrorCode.COMMON_INVALID_TYPE.toMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<BaseResponse<Void>> handleIllegalArgument(IllegalArgumentException e) {
         return ResponseEntity
-                .status(ErrorCode.INVALID_INPUT.getHttpStatus())
-                .body(BaseResponse.error(ErrorCode.INVALID_INPUT.toMessage()));
+                .status(ErrorCode.COMMON_INVALID_INPUT.getHttpStatus())
+                .body(BaseResponse.error(ErrorCode.COMMON_INVALID_INPUT.toMessage()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<BaseResponse<Void>> handleDataIntegrityViolation(DataIntegrityViolationException e) {
+        return ResponseEntity
+                .status(ErrorCode.COMMON_INTERNAL_SERVER_ERROR.getHttpStatus())
+                .body(BaseResponse.error(ErrorCode.COMMON_INTERNAL_SERVER_ERROR.toMessage()));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<BaseResponse<Void>> handleException(Exception e) {
         return ResponseEntity
-                .status(ErrorCode.INTERNAL_SERVER_ERROR.getHttpStatus())
-                .body(BaseResponse.error(ErrorCode.INTERNAL_SERVER_ERROR.toMessage()));
+                .status(ErrorCode.COMMON_INTERNAL_SERVER_ERROR.getHttpStatus())
+                .body(BaseResponse.error(ErrorCode.COMMON_INTERNAL_SERVER_ERROR.toMessage()));
     }
 }

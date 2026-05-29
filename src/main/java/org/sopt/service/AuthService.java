@@ -1,15 +1,24 @@
 package org.sopt.service;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import lombok.RequiredArgsConstructor;
 
+import org.sopt.domain.AccessTokenBlacklist;
 import org.sopt.domain.RefreshToken;
 import org.sopt.domain.User;
 import org.sopt.dto.response.TokenResponse;
+import org.sopt.dto.response.UserResponse;
+import org.sopt.exception.BaseException;
+import org.sopt.exception.ErrorCode;
+import org.sopt.repository.AccessTokenBlacklistRepository;
 import org.sopt.repository.RefreshTokenRepository;
 import org.sopt.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -17,17 +26,29 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final AccessTokenBlacklistRepository accessTokenBlacklistRepository;
     private final JwtService jwtService;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Value("${security.jwt.refresh-token-expires-in-seconds:1209600}")
     private long refreshTokenExpiresInSeconds;
 
+    @Transactional
+    public UserResponse signUp(String nickname, String email, String password) {
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new BaseException(ErrorCode.USER_EMAIL_DUPLICATE);
+        }
+        User user = new User(nickname, email, passwordEncoder.encode(password));
+        userRepository.save(user);
+        return UserResponse.from(user);
+    }
+
     private User findByCredentials(String email, String password) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new BaseException(ErrorCode.AUTH_INVALID_CREDENTIALS));
 
-        if (!user.getPassword().equals(password)) {
-            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new BaseException(ErrorCode.AUTH_INVALID_CREDENTIALS);
         }
 
         return user;
@@ -48,8 +69,40 @@ public class AuthService {
         return TokenResponse.of(accessToken, refreshToken);
     }
 
+    @Transactional
+    public TokenResponse reissue(String refreshToken) {
+        Long userId;
+        try {
+            userId = jwtService.verifyAndGetUserId(refreshToken);
+        } catch (IllegalArgumentException | JWTVerificationException e) {
+            throw new BaseException(ErrorCode.AUTH_UNAUTHORIZED);
+        }
+
+        RefreshToken stored = refreshTokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new BaseException(ErrorCode.AUTH_UNAUTHORIZED));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+
+        String newAccessToken = jwtService.generateAccessToken(user.getId(), user.getEmail());
+        String newRefreshToken = jwtService.generateRefreshToken(user.getId());
+
+        stored.rotate(newRefreshToken, refreshTokenExpiresInSeconds);
+
+        return TokenResponse.of(newAccessToken, newRefreshToken);
+    }
+
+    @Transactional
+    public void logout(Long userId, String accessToken) {
+        refreshTokenRepository.deleteByUserId(userId);
+        if (!accessTokenBlacklistRepository.existsByToken(accessToken)) {
+            LocalDateTime expiresAt = jwtService.getExpiresAt(accessToken);
+            accessTokenBlacklistRepository.save(AccessTokenBlacklist.of(accessToken, expiresAt));
+        }
+    }
+
     public User getUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
     }
 }

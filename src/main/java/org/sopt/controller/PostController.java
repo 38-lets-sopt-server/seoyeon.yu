@@ -6,10 +6,12 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import lombok.RequiredArgsConstructor;
 import org.sopt.dto.request.CreatePostRequest;
 import org.sopt.dto.request.UpdatePostRequest;
 import org.sopt.dto.response.BaseResponse;
@@ -19,20 +21,19 @@ import org.sopt.service.PostService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Post", description = "게시글 API")
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/posts")
 public class PostController {
 
     private final PostService postService;
 
-    public PostController(PostService postService) {
-        this.postService = postService;
-    }
-
     // POST /posts
+    @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "게시글 생성", description = "새로운 게시글을 생성합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "게시글 생성 성공"),
@@ -43,9 +44,11 @@ public class PostController {
     })
     @PostMapping
     public ResponseEntity<BaseResponse<CreatePostResponse>> createPost(
+            Authentication authentication,
             @Valid @RequestBody CreatePostRequest request
     ) {
-        CreatePostResponse response = postService.createPost(request);
+        Long userId = (Long) authentication.getPrincipal();
+        CreatePostResponse response = postService.createPost(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(BaseResponse.success("게시글이 생성되었습니다.", response));
     }
@@ -93,6 +96,7 @@ public class PostController {
     }
 
     // PUT /posts/{id}
+    @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "게시글 수정", description = "게시글 id로 특정 게시글의 제목과 내용을 수정합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "게시글 수정 성공"),
@@ -105,15 +109,18 @@ public class PostController {
     })
     @PutMapping("/{id}")
     public ResponseEntity<BaseResponse<Void>> updatePost(
+            Authentication authentication,
             @Parameter(description = "게시글 id", example = "1")
             @PathVariable Long id,
             @Valid @RequestBody UpdatePostRequest request
     ) {
-        postService.updatePost(id, request);
+        Long userId = (Long) authentication.getPrincipal();
+        postService.updatePost(userId, id, request);
         return ResponseEntity.ok(BaseResponse.success(null));
     }
 
     // DELETE /posts/{id}
+    @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "게시글 삭제", description = "게시글 id로 특정 게시글을 삭제합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "게시글 삭제 성공"),
@@ -124,10 +131,12 @@ public class PostController {
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<BaseResponse<Void>> deletePost(
+            Authentication authentication,
             @Parameter(description = "게시글 id", example = "1")
             @PathVariable Long id
     ) {
-        postService.deletePost(id);
+        Long userId = (Long) authentication.getPrincipal();
+        postService.deletePost(userId, id);
         return ResponseEntity.ok(BaseResponse.success("게시글이 삭제되었습니다.", null));
     }
 }
