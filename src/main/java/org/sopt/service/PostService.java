@@ -6,6 +6,7 @@ import org.sopt.dto.request.CreatePostRequest;
 import org.sopt.dto.request.UpdatePostRequest;
 import org.sopt.dto.response.CreatePostResponse;
 import org.sopt.dto.response.PostResponse;
+import java.util.List;
 import org.sopt.exception.BaseException;
 import org.sopt.exception.ErrorCode;
 import org.sopt.exception.PostNotFoundException;
@@ -67,6 +68,15 @@ public class PostService {
         }
 
         post.update(request.title(), request.content());
+    }
+
+    // SEARCH
+    @Transactional(readOnly = true)
+    public List<PostResponse> searchPosts(String title, String nickname) {
+        return postRepository.searchPosts(title, nickname)
+                .stream()
+                .map(post -> PostResponse.from(post, likeRepository.countByPost(post)))
+                .toList();
     }
 
     // DELETE

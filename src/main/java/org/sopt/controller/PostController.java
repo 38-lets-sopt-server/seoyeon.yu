@@ -19,6 +19,7 @@ import org.sopt.dto.response.CreatePostResponse;
 import org.sopt.dto.response.PostResponse;
 import org.sopt.service.PostService;
 import org.springframework.data.domain.Page;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -51,6 +52,25 @@ public class PostController {
         CreatePostResponse response = postService.createPost(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(BaseResponse.success("게시글이 생성되었습니다.", response));
+    }
+
+    // GET /posts/search
+    @Operation(summary = "게시글 검색", description = "제목 키워드와 작성자 닉네임으로 게시글을 검색합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "게시글 검색 성공"),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류가 발생했습니다.",
+                    content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
+    @GetMapping("/search")
+    public ResponseEntity<BaseResponse<List<PostResponse>>> searchPosts(
+            @Parameter(description = "제목 키워드", example = "제목")
+            @RequestParam(required = false) String title,
+
+            @Parameter(description = "작성자 닉네임", example = "김소연")
+            @RequestParam(required = false) String nickname
+    ) {
+        List<PostResponse> response = postService.searchPosts(title, nickname);
+        return ResponseEntity.ok(BaseResponse.success(response));
     }
 
     // GET /posts

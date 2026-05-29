@@ -9,7 +9,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PostRepository extends JpaRepository<Post, Long> {
+public interface PostRepository extends JpaRepository<Post, Long>, PostRepositoryCustom {
     @Query("SELECT p FROM Post p JOIN FETCH p.user")
     Page<Post> findAll(@NonNull Pageable pageable);
 }
