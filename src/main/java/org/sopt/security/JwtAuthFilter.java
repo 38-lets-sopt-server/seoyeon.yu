@@ -36,13 +36,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring("Bearer ".length()).trim();
             try {
-                Long memberId = jwtService.verifyAndGetUserId(token);
+                Long userId = jwtService.verifyAndGetUserId(token);
                 if (blacklistRepository.existsByToken(token)) {
                     securityErrorHandler.sendUnauthorized(response);
                     return;
                 }
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                        memberId, null, Collections.emptyList());
+                        userId, null, Collections.emptyList());
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
             } catch (IllegalArgumentException | JWTVerificationException e) {
