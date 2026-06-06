@@ -7,6 +7,8 @@ import org.sopt.dto.request.UpdatePostRequest;
 import org.sopt.dto.response.CreatePostResponse;
 import org.sopt.dto.response.PostResponse;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.sopt.exception.BaseException;
 import org.sopt.exception.ErrorCode;
 import org.sopt.exception.PostNotFoundException;
@@ -45,8 +47,9 @@ public class PostService {
     @Transactional(readOnly = true)
     public Page<PostResponse> getAllPosts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return postRepository.findAll(pageable)
-                .map(post -> PostResponse.from(post, likeRepository.countByPost(post)));
+        Page<Post> posts = postRepository.findAll(pageable);
+        Map<Long, Long> likeCountMap = getLikeCountMap(posts.getContent());
+        return posts.map(post -> PostResponse.from(post, likeCountMap.getOrDefault(post.getId(), 0L)));
     }
 
     // READ ONE
@@ -73,10 +76,20 @@ public class PostService {
     // SEARCH
     @Transactional(readOnly = true)
     public List<PostResponse> searchPosts(String title, String nickname) {
-        return postRepository.searchPosts(title, nickname)
-                .stream()
-                .map(post -> PostResponse.from(post, likeRepository.countByPost(post)))
+        List<Post> posts = postRepository.searchPosts(title, nickname);
+        Map<Long, Long> likeCountMap = getLikeCountMap(posts);
+        return posts.stream()
+                .map(post -> PostResponse.from(post, likeCountMap.getOrDefault(post.getId(), 0L)))
                 .toList();
+    }
+
+    private Map<Long, Long> getLikeCountMap(List<Post> posts) {
+        List<Long> postIds = posts.stream().map(Post::getId).toList();
+        return likeRepository.countByPostIds(postIds).stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (Long) row[1]
+                ));
     }
 
     // DELETE
